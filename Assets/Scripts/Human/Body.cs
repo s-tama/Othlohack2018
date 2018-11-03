@@ -12,9 +12,12 @@ using UnityEngine;
 public class Body : MonoBehaviour 
 {
 
-    // 体脂肪　
-    [SerializeField][Header("体脂肪")][Range(1, 100)]
-    private int m_fat = 20;
+    // メッシュ
+    private Mesh m_mesh;
+
+    // 変
+    [SerializeField][Range(1, 10)]
+    private float m_vertTmp = 1;
 
 
     /// <summary>
@@ -22,7 +25,7 @@ public class Body : MonoBehaviour
     /// </summary>
     private void Start()
     {
-
+        m_mesh = GetComponent<MeshFilter>().mesh;
     }
 
     /// <summary>
@@ -30,9 +33,14 @@ public class Body : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        float scaleX = 5 - (100 / m_fat);
-        float scaleY = this.transform.localScale.y;
-        float scaleZ = 5 - (100 / m_fat);
-        this.transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
+        Vector3[] vertices = m_mesh.vertices;
+        Vector3[] normals = m_mesh.normals;
+
+        for (var i = 0; i < vertices.Length; i++)
+        {
+            vertices[i] += normals[i] * Mathf.Sin(Time.time);
+        }
+
+        m_mesh.vertices = vertices;
     }
 }
