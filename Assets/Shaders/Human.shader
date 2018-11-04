@@ -1,48 +1,179 @@
-﻿Shader "Custom/Human" {
-	Properties {
-		_Color ("Color", Color) = (1,1,1,1)
-		_MainTex ("Albedo (RGB)", 2D) = "white" {}
-		_Glossiness ("Smoothness", Range(0,1)) = 0.5
-		_Metallic ("Metallic", Range(0,1)) = 0.0
+﻿//
+// Earth.shader
+//
+
+// ------------------------------------------------
+// 地球のシェーダー
+// ------------------------------------------------
+Shader "Custom/Earth"
+{
+	Properties
+	{
+		_MainTex("Main texture", 2D) = "white"{}
+		_AppearPos("AppearPos", Float) = 20
 	}
-	SubShader {
-		Tags { "RenderType"="Opaque" }
+
+	SubShader
+	{
+		Tags
+		{
+			"Queue" = "Geometry"
+			"RenderType" = "Transparent"
+			"RenderType" = "Opaque"
+			"Queue" = "Transparent"
+		}
 		LOD 200
 
-		CGPROGRAM
-		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard fullforwardshadows
+			Cull Back
+			ZWrite On
+			Blend SrcAlpha OneMinusSrcAlpha
 
-		// Use shader model 3.0 target, to get nicer looking lighting
-		#pragma target 3.0
+		//Pass
+		//{
+		//	Cull Front
 
-		sampler2D _MainTex;
+		//	CGPROGRAM
+		//	#pragma vertex vert
+		//	#pragma fragment frag
 
-		struct Input {
-			float2 uv_MainTex;
-		};
+		//	#include "UnityCG.cginc"
 
-		half _Glossiness;
-		half _Metallic;
-		fixed4 _Color;
 
-		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-		// #pragma instancing_options assumeuniformscaling
-		UNITY_INSTANCING_BUFFER_START(Props)
-			// put more per-instance properties here
-		UNITY_INSTANCING_BUFFER_END(Props)
+		//	// ----------------------------------------------
+		//	// 入力
+		//	// ----------------------------------------------
+		//	struct appdata
+		//	{
+		//		float4 vertex : POSITION;
+		//		float3 normal : NORMAL;
+		//	};
 
-		void surf (Input IN, inout SurfaceOutputStandard o) {
-			// Albedo comes from a texture tinted by color
-			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-			o.Albedo = c.rgb;
-			// Metallic and smoothness come from slider variables
-			o.Metallic = _Metallic;
-			o.Smoothness = _Glossiness;
-			o.Alpha = c.a;
+		//	// ----------------------------------------------
+		//	// フラグメントシェーダーに渡すデータ
+		//	// ----------------------------------------------
+		//	struct v2f
+		//	{
+		//		float4 vertex : SV_POSITION;
+		//	};
+
+
+		//	// ----------------------------------------------
+		//	// 頂点シェーダ
+		//	// ----------------------------------------------
+		//	v2f vert(appdata v)
+		//	{
+		//		v2f o;
+		//		//v.vertex += float4(v.normal * 0.001f, 0);
+		//		o.vertex = UnityObjectToClipPos(v.vertex);
+		//		return o;
+		//	}
+
+		//	// ----------------------------------------------
+		//	// フラグメントシェーダ
+		//	// ----------------------------------------------
+		//	float4 frag(v2f i) : SV_Target
+		//	{
+		//		// 基本色
+		//		float4 albedo = float4(0, 0, 0, 1);
+		//		return albedo;
+		//	}
+		//	ENDCG
+		//}
+
+		Pass
+		{
+			Tags
+			{
+				"LightMode" = "ForwardBase"
+			}
+
+			
+
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#include "UnityCG.cginc"
+
+
+			// テクスチャ
+			sampler2D _MainTex;
+			// 拡散範囲
+			float _Displacement;
+			// 出現座標
+			float _AppearPos;
+
+
+			// ----------------------------------------------
+			// 入力
+			// ----------------------------------------------
+			struct appdata
+			{
+				float4 vertex	: POSITION;		// 頂点座標
+				float3 normal	: NORMAL;		// 頂点の法線情報	
+				float2 uv		: TEXCOORD0;	// テクスチャのuv情報
+				float4 tangent	: TANGENT;		// 接線の情報
+			};
+
+			// ----------------------------------------------
+			// フラグメントシェーダに渡す情報
+			// ----------------------------------------------
+			struct v2f
+			{
+				float4 vertex	: SV_POSITION;	// 頂点座標
+				float3 normal	: NORMAL;		// 法線情報	
+				float2 uv		: TEXCOORD0;	// テクスチャのuv情報
+				float3 viewDir	: TEXCOORD1;	// カメラの方向ベクトル
+				float3 lightDir : TEXCOORD2;	// ライトの方向ベクトル		
+				float3 worldPos : TEXCOORD3;	// オブジェクトのワールド座標
+				float4 color    : COLOR;		// 頂点色
+			};
+
+
+			// ----------------------------------------------
+			// 頂点シェーダー
+			// ----------------------------------------------
+			v2f vert(appdata v)
+			{
+				// フラグメントシェーダーに渡すデータ
+				v2f o;
+				o.normal = UnityObjectToWorldNormal(v.normal);
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+				o.uv = v.uv;
+
+				// 接空間におけるライト方向のベクトルと視点方向のベクトルを求める
+				TANGENT_SPACE_ROTATION;
+				o.lightDir = normalize(ObjSpaceLightDir(v.vertex));
+				o.viewDir = normalize(ObjSpaceViewDir(v.vertex));
+
+				// 頂点色を設定
+				o.color = float4(1, 1, 1, 1);
+
+				// 頂点のアルファ値を変更
+				if (o.worldPos.y > _AppearPos)
+				{
+					o.color.a = 0;
+				}
+
+				// 結果を返す
+				return o;
+			}
+
+			// ----------------------------------------------
+			// フラグメントシェーダー
+			// ----------------------------------------------
+			float4 frag(v2f i) : COLOR
+			{
+				// 描画色
+				float4 albedo = float4(1, 1, 1, 1);
+				albedo = tex2D(_MainTex, i.uv);
+
+				// 結果を返す
+				return albedo * i.color;
+			}
+			ENDCG
 		}
-		ENDCG
 	}
 	FallBack "Diffuse"
 }
