@@ -32,21 +32,23 @@ public class GameDirector : MonoBehaviour
     {
         // メディエーターの作成
         m_mediator = GameObject.FindGameObjectWithTag("Mediator").GetComponent<Mediator>();
+
+        m_mediator.UIManager.WipeEffect.Fade = 1;
     }
 
     /// <summary>
     /// 更新処理
     /// </summary>
     private void Update()
-    { 
-        if(m_flag.Check(NEXT))
+    {
+        if (m_flag.Check(NEXT))
         {
             m_mediator.UIManager.WipeEffect.Fade -= 2 * Time.deltaTime;
         }
 
         if (m_mediator.UIManager.WipeEffect.Fade <= 0)
         {
-            Debug.Log("次のシーンへ");
+            SceneManager.LoadScene("1103");
         }
     }
 

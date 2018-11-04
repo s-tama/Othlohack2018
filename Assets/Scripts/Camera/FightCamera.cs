@@ -18,6 +18,9 @@ public class FightCamera : MonoBehaviour
     // メディエーター
     private Mediator m_mediator;
 
+    // 振動時間
+    private float m_vibrationCount = 0;
+
 
     /// <summary>
     /// 開始処理
@@ -45,6 +48,23 @@ public class FightCamera : MonoBehaviour
         if (m_currentState != null)
         {
             m_currentState.Execute();
+        }
+    }
+
+
+    /// <summary>
+    /// カメラを揺らす
+    /// </summary>
+    /// <param name="time">揺らす時間</param>
+    public void VibrationCamera(float time)
+    {
+        m_vibrationCount += Time.deltaTime;
+
+        if (m_vibrationCount < time)
+        {
+            float randomX = Random.Range(-1.5f, 1.5f);
+            float randomY = Random.Range(-1.5f, 1.5f);
+            this.transform.position += new Vector3(randomX, randomY, 0) * Time.deltaTime;
         }
     }
 

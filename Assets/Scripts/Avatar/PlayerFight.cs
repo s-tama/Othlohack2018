@@ -63,7 +63,7 @@ public class PlayerFight : PlayerState
             m_flag.On(GO_TO_ENEMY);
         }
 
-        if (m_flag.Check(GO_TO_ENEMY))
+        if ((m_flag.Check(GO_TO_ENEMY) && !m_flag.Check(PUNCH)))
         {
             GameObject enemy = GameObject.Find("Enemy");
             if (m_player.transform.position.z < -9)
@@ -73,6 +73,7 @@ public class PlayerFight : PlayerState
             else
             {
                 animator.SetBool("walking", false);
+                
                 m_flag.On(PUNCH);
             }
         }
@@ -86,7 +87,12 @@ public class PlayerFight : PlayerState
         {
             animator.SetBool("punching", true);
             m_nextAction++;
-            if (m_nextAction > 30)
+            
+            if(m_nextAction > 60)
+            {
+                Camera.main.GetComponent<FightCamera>().VibrationCamera(20);
+            }
+            if (m_nextAction > 80)
             {
                 m_player.Flag.On(m_player.ACTION_END);
             }

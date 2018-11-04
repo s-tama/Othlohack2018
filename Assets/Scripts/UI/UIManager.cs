@@ -37,7 +37,7 @@ public class UIManager : MonoBehaviour
         if (m_comeTimeText != null)
         {
             // 「時は来た」テキストが範囲外で削除する
-            if (m_comeTimeText.rectTransform.position.x >= 500)
+            if (m_comeTimeText.rectTransform.anchoredPosition.x >= 600)
             {
                 Destroy(m_comeTimeText);
             }

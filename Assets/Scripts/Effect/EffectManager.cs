@@ -55,7 +55,7 @@ public class EffectManager : MonoBehaviour
         if (m_windEffect != null)
         {
             // 「時は来た」テキストが範囲外で風エフェクトを破棄
-            if (uiManager.ComeTimeText.rectTransform.position.x >= 500)
+            if (uiManager.ComeTimeText.rectTransform.anchoredPosition.x >= 600)
             {
                 // 風エフェクトを破棄する
                 Destroy(m_windEffect);

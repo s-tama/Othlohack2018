@@ -23,9 +23,6 @@ public class WipeEffect : MonoBehaviour
     {
         // レンダラーの作成
         m_renderer = GetComponent<Image>();
-
-        // フェード値を初期化する
-        m_fade = 1;
     }
 
     /// <summary>
